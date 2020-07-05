@@ -19,6 +19,15 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: zkenv
+data:
+  ZK_SERVER_HEAP: "1000"
+  ZK_CLIENT_HEAP: "500"
+  SERVER_JVMFLAGS: "-XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Djava.awt.headless=true"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: zkconfig
 data:
   zoo.cfg.yaml: |
@@ -75,6 +84,22 @@ spec:
       - name: zookeeper
         imagePullPolicy: Always
         image: localhost:5000/zookeeper:3.6.1
+        env:
+        - name: ZK_SERVER_HEAP
+          valueFrom:
+            configMapKeyRef:
+              name: zkenv
+              key: ZK_SERVER_HEAP
+        - name: ZK_CLIENT_HEAP
+          valueFrom:
+            configMapKeyRef:
+              name: zkenv
+              key: ZK_CLIENT_HEAP
+        - name: SERVER_JVMFLAGS
+          valueFrom:
+            configMapKeyRef:
+              name: zkenv
+              key: SERVER_JVMFLAGS
         resources:
           requests:
             memory: "0.5Gi"
