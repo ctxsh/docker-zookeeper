@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper
+  labels:
+    app: zookeeper
+spec:
+  ports:
+  - port: 2181
+    name: client
+  - port: 2888
+    name: server
+  - port: 3888
+    name: leader-election
+  clusterIP: None
+  selector:
+    app: zookeeper
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zkconfig
+data:
+  zoo.cfg.yaml: |
+    size: 5
+    properties:
+      tickTime: 2000
+      initLimit: 20
+      syncLimit: 5
+      dataDir: /data/zookeeper
+      clientPort: 2181
+      maxClientCnxns: 100
+      metricsProvider.httpPort: 8088
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dev
+spec:
+  containers:
+    - name: dev
+      imagePullPolicy: Always
+      image: ctxsh/utils:v1.0
+      command: ["/bin/sh", "-c", "while true; do sleep 10; done"]
+      resources:
+        requests:
+          memory: "0.5Gi"
+          cpu: "0.25"
+      volumeMounts:
+      - name: code
+        mountPath: /code
+  volumes:
+  - name: code
+    hostPath:
+      path: /code
+      type: Directory
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zk
+spec:
+  serviceName: zookeeper
+  replicas: 5
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      name: zoo
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+      - name: zookeeper
+        imagePullPolicy: Always
+        image: localhost:5000/zookeeper:3.6.1
+        resources:
+          requests:
+            memory: "0.5Gi"
+            cpu: "0.25"
+        ports:
+        - containerPort: 2181
+          name: client
+        - containerPort: 2888
+          name: server
+        - containerPort: 3888
+          name: leader-election
+        volumeMounts:
+        - name: code
+          mountPath: /code
+        - name: zkconfig
+          mountPath: /etc/zookeeper.d
+      volumes:
+      - name: code
+        hostPath:
+          path: /code
+          type: Directory
+      - name: zkconfig
+        configMap:
+          name: zkconfig
