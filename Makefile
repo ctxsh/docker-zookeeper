@@ -38,7 +38,7 @@ local-release:
 
 .PHONY: local-deploy
 local-deploy:
-	@kubectl apply -f $(MAKE_PATH)test/all.yaml
+	@kubectl apply -k $(MAKE_PATH)test/manifests
 
 ###################################################################################################
 # Utility targets
