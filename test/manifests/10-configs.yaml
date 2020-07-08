@@ -13,7 +13,7 @@ metadata:
   name: zkconfig
 data:
   zoo.cfg.yaml: |
-    size: 5
+    size: 3
     properties:
       tickTime: 2000
       initLimit: 20
