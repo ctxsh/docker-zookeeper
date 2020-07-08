@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-zk-3
+spec:
+  backoffLimit: 4
+  template:
+    spec:
+      containers:
+      - name: test-zk-3
+        image: ctxsh/utils:v1.0
+        command:
+        - bash
+        - -c
+        - "cd /code/test && pip3 install -r ../requirements.txt && python3 -mintegration.runner --count 3"
+        volumeMounts:
+        - name: code
+          mountPath: /code
+      restartPolicy: Never
+      volumes:
+      - name: code
+        hostPath:
+          path: /code
+          type: Directory
