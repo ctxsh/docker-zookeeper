@@ -1,0 +1,16 @@
+tickTime={{ properties.tickTime }}
+initLimit={{ properties.initLimit}}
+syncLimit={{ properties.syncLimit }}
+dataDir={{ properties.dataDir}}
+clientPort={{ properties.clientPort }}
+maxClientCnxns={{ properties.maxClientCnxns }}
+autopurge.snapRetainCount={{ properties.autopurge.snapRetainCount }}
+autopurge.purgeInterval={{ properties.autopurge.purgeInterval }}
+metricsProvider.className={{ properties.metricsProvider.className }}
+metricsProvider.httpPort={{ properties.metricsProvider.httpPort }}
+metricsProvider.exportJvmInfo={{ properties.metricsProvider.exportJvmInfo }}
+4lw.commands.whitelist={{ properties.commands.whitelist }}
+
+{% for ordinal in range(server.size) -%}
+server.{{ ordinal }}={{ server.name }}-{{ ordinal }}.{{ server.domain }}:2888:3888
+{% endfor %}

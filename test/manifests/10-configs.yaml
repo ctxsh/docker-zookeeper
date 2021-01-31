@@ -6,19 +6,4 @@ data:
   ZK_SERVER_HEAP: "1000"
   ZK_CLIENT_HEAP: "500"
   SERVER_JVMFLAGS: "-XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Djava.awt.headless=true"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: zkconfig
-data:
-  zoo.cfg.yaml: |
-    size: 3
-    properties:
-      tickTime: 2000
-      initLimit: 20
-      syncLimit: 5
-      dataDir: /data/zookeeper
-      clientPort: 2181
-      maxClientCnxns: 100
-      metricsProvider.httpPort: 8088
+  ZK_SIZE: "3"

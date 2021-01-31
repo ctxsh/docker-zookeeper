@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
 
+import sys
 import logging
 import argparse
 from typing import List
-from kazoo.client import KazooClient
+from kazoo.client import KazooClient, KazooRetry
+from kazoo.handlers.threading import KazooTimeoutError
 
 logging.basicConfig()
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
 def final_check(hosts: List[str]) -> int:
-  zk = KazooClient(hosts=hosts)
+  conn_retry_policy = KazooRetry(max_tries=10, delay=0.1, max_delay=0.1)
+  cmd_retry_policy = KazooRetry(max_tries=5, delay=0.3, backoff=1, max_delay=1, ignore_expire=False)
+  zk = KazooClient(hosts=hosts, timeout=10, command_retry=cmd_retry_policy, connection_retry=conn_retry_policy)
+  
   zk.start()
 
   for host in hosts:
@@ -28,7 +33,10 @@ def final_check(hosts: List[str]) -> int:
 
 
 def run_tests(host: str) -> int:
-  zk = KazooClient(hosts=host)
+  conn_retry_policy = KazooRetry(max_tries=10, delay=0.1, max_delay=0.1)
+  cmd_retry_policy = KazooRetry(max_tries=5, delay=0.3, backoff=1, max_delay=1, ignore_expire=False)
+  zk = KazooClient(hosts=host, timeout=10, command_retry=cmd_retry_policy, connection_retry=conn_retry_policy)
+
   zk.start()
 
   hostname = host.split(".")[0]
