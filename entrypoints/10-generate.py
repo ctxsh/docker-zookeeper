@@ -8,9 +8,10 @@ import logging
 import socket
 from pathlib import Path
 
-FORMAT = '%(asctime)-15s %(message)s'
+FORMAT = '[%(asctime)s] %(levelname)s %(message)s'
 logging.basicConfig(format=FORMAT)
 log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
 
 
 class Commands:
@@ -50,15 +51,32 @@ class Server:
   myid: str = ""
 
   def __init__(self: "Server") -> None:
-    # Hostnames are expected to look like this: zk-0.zookeeper.default.svc.cluster.local
-    # It's also expected that each will live in the same namespace/cluster
-    hostname, domain = self.host.split(".", 1)
-    name, ordinal = hostname.rsplit("-", 1)
+    hostname = "localhost"
+    domain = "internal"
+
+    parts = self.host.split(".", 1)
+    if len(parts) == 2:
+      hostname = parts[0]
+      domain = parts[1]
+    elif len(parts) == 1:
+      hostname = parts[0]
+
+    try:
+      name, ordinal = hostname.rsplit("-", 1)
+    except ValueError:
+      log.warning(f"Could not determine ordinal from hostname, using 0")
+      name = hostname
+      ordinal = "0"
 
     self.name = name
     self.ordinal = ordinal
     self.domain = domain
     self.hostname = hostname
+
+    log.info(f"Name: {name}")
+    log.info(f"Ordinal: {ordinal}")
+    log.info(f"Domain: {domain}")
+    log.info(f"Hostname: {hostname}")
 
     myid = os.environ.get("ZK_MYID", None)
     if myid:
