@@ -23,22 +23,16 @@ release:
 ###################################################################################################
 # Local testing targets
 ###################################################################################################
-.PHONY: local
-local: zookeeper local-kind local-release local-deploy
-
-.PHONY: local-kind
-local-kind:
+.PHONY: kind
+kind:
 	@$(MAKE_PATH)test/kind.sh
 	@kubectl cluster-info --context kind-kind
 
-.PHONY: local-release
-local-release:
+.PHONY: test
+test: zookeeper
 	@docker tag $(DOCKERHUB_USER)/zookeeper:$(VERSION) localhost:5000/zookeeper:$(VERSION)
 	@docker push localhost:5000/zookeeper:$(VERSION)
-
-.PHONY: local-deploy
-local-deploy:
-	@kubectl apply -k $(MAKE_PATH)test/manifests
+	@./test/run.sh
 
 ###################################################################################################
 # Utility targets
